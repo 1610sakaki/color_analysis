@@ -101,33 +101,17 @@ class KMeansAnalyzer:
             self.labels, axis=0, return_counts=True
         )  # 重複したラベルを抽出し、カウント（NUMBER_OF_CLUSTERSの大きさだけラベルタイプが存在する）
 
-        self.hsv_value = self.__rgb_to_hsv(self.rgb_value)
-        self.df = self.__summarize_result(self.rgb_value, self.hsv_value, self.counts)
+        self.df = self.__summarize_result(self.rgb_value,  self.counts)
 
         return self.df
 
-    @staticmethod
-    def __rgb_to_hsv(rgb_value):
-        hsv_value_list = []
-        for r, g, b in rgb_value:
-            h, s, v = colorsys.rgb_to_hsv(r / 255, g / 255, b / 255)
-            h, s, v = round(h * 100), round(s * 100), round(v * 100)
-            hsv_value_list.append(np.array([h, s, v]))
-            print(f"RGB: ({r}, {g}, {b}) -> HSV: ({h:.2f}, {s:.2f}%, {v:.2f}%)")
-        return hsv_value_list
-
     # 計算結果をグラフ用にDataFrame化させる
     @staticmethod
-    def __summarize_result(rgb_value, hsv_value, counts):
+    def __summarize_result(rgb_value, counts):
         df = pd.DataFrame(data=counts, columns=["counts"])
         df["R"] = rgb_value[:, 0]
         df["G"] = rgb_value[:, 1]
         df["B"] = rgb_value[:, 2]
-
-        hsv_value = np.array(hsv_value)
-        df["h"] = hsv_value[:, 0].astype(int)
-        df["s"] = hsv_value[:, 1].astype(int)
-        df["v"] = hsv_value[:, 2].astype(int)
 
         # plt用に補正
         bar_color = rgb_value / 255
