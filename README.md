@@ -22,6 +22,13 @@ NUMBER_OF_CLUSTERS = 5
 - `NUMBER_OF_CLUSTERS`で、K-平均のクラスタ数を指定する。
 
 # K-平均法
+## そもそもK-平均法とは？
+**K-平均法（K-means clustering）** は、クラスタリングの手法の1つで、与えられたデータセットをK個のクラスタに分割するアルゴリズムです。
+
+具体的には、まずK個の中心点をランダムに設定します。その後、各データポイントがそれぞれ最も近い中心点に属するようにクラスタに割り当てます。次に、各クラスタの中心を再計算し、その中心を新しい中心点として使い、再度クラスタリングを行います。このプロセスを繰り返し、各中心点が変化しなくなるまで続けます。
+
+K-平均法はマーケティング調査や自然言語処理にも使われますが画像処理でも使うことができます。画像中のピクセル値をベクトル化し、そのベクトルを元に似た特徴を持つ画像をクラスタリングすることができます。
+
 ## K-meansアルゴリズムの収束基準を設定する
 ```Python
 criteria = cv2.TERM_CRITERIA_MAX_ITER + cv2.TERM_CRITERIA_EPS, 10, 1.0
@@ -52,3 +59,50 @@ centers:クラスタの中心点の座標の配列。要は画像の場合は、
 
 # サンプル画像でK-平均をやってみる。
 
+## Google のロゴ
+### 元画像
+![Google-Logo](data/sample/Google-Logo.jpg)
+### K=5
+![Google-Logo](sample_image_result/Google-Logo.jpg_k5_result.jpg)
+![Google-Logo](sample_image_result/Google-Logo.jpg_k5_replaced.jpg)
+### K=10
+![Google-Logo](sample_image_result/Google-Logo.jpg_k10_result.jpg)
+![Google-Logo](sample_image_result/Google-Logo.jpg_k10_replaced.jpg)
+### K=20
+![Google-Logo](sample_image_result/Google-Logo.jpg_k20_result.jpg)
+![Google-Logo](sample_image_result/Google-Logo.jpg_k20_replaced.jpg)
+### K=50
+![Google-Logo](sample_image_result/Google-Logo.jpg_k50_result.jpg)
+![Google-Logo](sample_image_result/Google-Logo.jpg_k50_replaced.jpg)
+
+## フルーツの写真
+### 元画像
+![fresh-fruits](data/sample/fresh-fruits-2305192_960_720.jpg)
+### K=5
+![Google-Logo](sample_image_result/fresh-fruits-2305192_960_720.jpg_k5_result.jpg)
+![Google-Logo](sample_image_result/fresh-fruits-2305192_960_720.jpg_k5_replaced.jpg)
+### K=10
+![Google-Logo](sample_image_result/fresh-fruits-2305192_960_720.jpg_k10_result.jpg)
+![Google-Logo](sample_image_result/fresh-fruits-2305192_960_720.jpg_k10_replaced.jpg)
+### K=20
+![Google-Logo](sample_image_result/fresh-fruits-2305192_960_720.jpg_k20_result.jpg)
+![Google-Logo](sample_image_result/fresh-fruits-2305192_960_720.jpg_k20_replaced.jpg)
+### K=50
+![Google-Logo](sample_image_result/fresh-fruits-2305192_960_720.jpg_k50_result.jpg)
+![Google-Logo](sample_image_result/fresh-fruits-2305192_960_720.jpg_k50_replaced.jpg)
+
+## 山と海
+### 元画像
+![sea-free-photo](data/sample/sea-free-photo5.jpg)
+### K=5
+![Google-Logo](sample_image_result/sea-free-photo5.jpg_k5_result.jpg)
+![Google-Logo](sample_image_result/sea-free-photo5.jpg_k5_replaced.jpg)
+### K=10
+![Google-Logo](sample_image_result/sea-free-photo5.jpg_k10_result.jpg)
+![Google-Logo](sample_image_result/sea-free-photo5.jpg_k10_replaced.jpg)
+### K=20
+![Google-Logo](sample_image_result/sea-free-photo5.jpg_k20_result.jpg)
+![Google-Logo](sample_image_result/sea-free-photo5.jpg_k20_replaced.jpg)
+### K=50
+![Google-Logo](sample_image_result/sea-free-photo5.jpg_k50_result.jpg)
+![Google-Logo](sample_image_result/sea-free-photo5.jpg_k50_replaced.jpg)
