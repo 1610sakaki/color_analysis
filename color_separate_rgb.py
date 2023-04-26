@@ -6,34 +6,27 @@ import cv2
 import matplotlib.pyplot as plt
 import numpy as np
 import pandas as pd
-from PIL import Image
 
-NUM = 1
-
-# 画像クリップ位置スタート座標とレンジ
-START_X = 0
-START_Y = 0
-RANGE_X = 1500
-RANGE_Y = 1000
-
-# 画像ファイルパス
+# 画像のパス、名前、切り抜く範囲を指定する
 IMG_PATH = "data/sample/Google-Logo.jpg"
-IMG_PATH = "data/sample/sea-free-photo5.jpg"
+# IMG_PATH = "data/sample/sea-free-photo5.jpg"
+# IMG_PATH = "data/sample/fresh-fruits-2305192_960_720.jpg"
 IMG_NAME = IMG_PATH.split("/")[-1]
-
-# K平均法クラスタ数
-NUMBER_OF_CLUSTERS = 10
+START_X, START_Y = 0, 0
+RANGE_X, RANGE_Y = 1500, 1000
+NUMBER_OF_CLUSTERS = 5
 
 
 # 読み込む画像を指定する
 class SetLoadingImage:
-    def __init__(self) -> None:
-        self.__read_image()
+    def __init__(self, img_path=IMG_PATH):
+        self.img = self.read_image(img_path)
 
-    def __read_image(self, img_path=IMG_PATH):
+    def read_image(self, img_path):
         try:
             read_img = cv2.imread(img_path)
-            self.img = cv2.cvtColor(read_img, cv2.COLOR_BGR2RGB)  # RGB並び替え
+            img = cv2.cvtColor(read_img, cv2.COLOR_BGR2RGB)
+            return img
         except cv2.error:
             print("画像読み込みエラーのため、終了します")
             sys.exit()
@@ -43,14 +36,11 @@ class SetLoadingImage:
         return self.img
 
 
-# 画像の分析範囲を指定
 class SpecifyAnalysisRange:
-    def __init__(self, img) -> None:
+    def __init__(self, img):
         self.org_img = img
-        self.width, self.height = self.org_img.size
         self.drawed_img = np.copy(img)
 
-    # 切り抜き範囲を描画する
     def clip(
         self,
         start_x=START_X,
@@ -58,53 +48,42 @@ class SpecifyAnalysisRange:
         draw_range_x=RANGE_X,
         draw_range_y=RANGE_Y,
     ):
-
-        self.clipped_img = self.drawed_img[
-            start_y : start_y + draw_range_y,
-            start_x : start_x + draw_range_x,  # (y, x)の順に記述
+        self.clipped = self.drawed_img[
+            start_y : start_y + draw_range_y, start_x : start_x + draw_range_x
         ]
-        # 全体画像内に描画する
         self.include_square_img = cv2.rectangle(
-            img=self.org_img,  # 枠なしの画像を表示させる
+            img=self.org_img,
             pt1=(start_x, start_y),
             pt2=(start_x + draw_range_x, start_y + draw_range_y),
             color=(255, 0, 0),
             thickness=2,
         )
-
-        return self.clipped_img
+        return self.clipped
 
     @property
     def overall_image(self):
+        self.clip()
         return self.include_square_img
 
     @property
-    def cliped_image(self):
-        return self.clipped_img
+    def clipped_image(self):
+        return self.clipped
 
 
 # K-Means法で画像を分析
 class KMeansAnalyzer:
-    def __init__(self, img) -> None:
+    def __init__(self, img):
         self.img = img  # 切り抜き範囲の画像を代入
-
         self.number_of_cluster = NUMBER_OF_CLUSTERS  # クラスタ数
 
     # K平均法で計算する
-    def analyze(self):
+    def analyze(self) -> pd.DataFrame:
         colors = self.img.reshape(-1, 3).astype(
             np.float32
         )  # 画像で使用されている色一覧。(W * H, 3) の numpy 配列。
 
         # K-meansアルゴリズムの収束基準を設定
         criteria = cv2.TERM_CRITERIA_MAX_ITER + cv2.TERM_CRITERIA_EPS, 10, 1.0
-        """
-        cv2.TERM_CRITERIA_MAX_ITER:反復回数が最大値に達した場合に収束判定を行うフラグ
-        cv2.TERM_CRITERIA_EPS:クラスタ中心が移動する距離がしきい値以下になった場合に収束判定を行うフラグ
-
-        criteria = cv2.TERM_CRITERIA_MAX_ITER + cv2.TERM_CRITERIA_EPS, 10, 1.0
-        であれば、最大反復回数が10で、移動量の閾値が1.0
-        """
 
         _, labels, rgb_value = cv2.kmeans(
             data=colors,  # クラスタリングするための入力データ
@@ -114,16 +93,11 @@ class KMeansAnalyzer:
             attempts=10,  # 異なる初期値でアルゴリズムを実行する回数
             flags=cv2.KMEANS_RANDOM_CENTERS,  # クラスタリングアルゴリズムのフラグ
         )
-        """
-        戻り値は以下の3つ
-        compactness:各点とその所属するクラスタ中心との距離の総和。
-        labels:各データ点の所属するクラスタのラベル。
-        centers:クラスタの中心点の座標の配列。要は画像の場合は、RGBのリストになっている。
-        """
+
         self.labels = labels.squeeze(axis=1)  # (N, 1) -> (N,)のように要素数が1の次元を除去する
         self.rgb_value = rgb_value.astype(np.uint8)  # float32 -> uint8
 
-        _label, self.counts = np.unique(
+        _, self.counts = np.unique(
             self.labels, axis=0, return_counts=True
         )  # 重複したラベルを抽出し、カウント（NUMBER_OF_CLUSTERSの大きさだけラベルタイプが存在する）
 
@@ -132,8 +106,19 @@ class KMeansAnalyzer:
 
         return self.df
 
+    @staticmethod
+    def __rgb_to_hsv(rgb_value):
+        hsv_value_list = []
+        for r, g, b in rgb_value:
+            h, s, v = colorsys.rgb_to_hsv(r / 255, g / 255, b / 255)
+            h, s, v = round(h * 100), round(s * 100), round(v * 100)
+            hsv_value_list.append(np.array([h, s, v]))
+            print(f"RGB: ({r}, {g}, {b}) -> HSV: ({h:.2f}, {s:.2f}%, {v:.2f}%)")
+        return hsv_value_list
+
     # 計算結果をグラフ用にDataFrame化させる
-    def __summarize_result(self, rgb_value, hsv_value, counts):
+    @staticmethod
+    def __summarize_result(rgb_value, hsv_value, counts):
         df = pd.DataFrame(data=counts, columns=["counts"])
         df["R"] = rgb_value[:, 0]
         df["G"] = rgb_value[:, 1]
@@ -158,15 +143,6 @@ class KMeansAnalyzer:
         df = df.sort_values("counts", ascending=True).reset_index(drop=True)
         return df
 
-    def __rgb_to_hsv(self, rgb_value):
-        hsv_value_list = []
-        for r, g, b in rgb_value:
-            h, s, v = colorsys.rgb_to_hsv(r / 255, g / 255, b / 255)
-            h, s, v = round(h * 100), round(s * 100), round(v * 100)
-            hsv_value_list.append(np.array([h, s, v]))
-            print(f"RGB: ({r}, {g}, {b}) -> HSV: ({h:.2f}, {s:.2f}%, {v:.2f}%)")
-        return hsv_value_list
-
 
 class MakeFigure:
     def __init__(self, dataframe, image, rgb_value, labels) -> None:
@@ -178,17 +154,24 @@ class MakeFigure:
         self.labels = labels  # 図専用ラベル
 
     def output_histgram(self, ax):
-        rgb_value_counts = self.df.iloc[:, 0].to_numpy().tolist()  # ヒストグラム用のrgb値カウント数
-        bar_color = self.df.iloc[:, 7:10].to_numpy().tolist()
-        bar_text = self.df.iloc[:, 1:4].to_numpy().tolist()
-        bar_text_list = list(map(str, bar_text))
+        rgb_value_counts = (
+            self.df.loc[:, ["counts"]].to_numpy().flatten().tolist()
+        )  # ヒストグラム用のrgb値カウント数
+
+        bar_color = (
+            self.df.loc[:, ["plt_R_value", "plt_G_value", "plt_B_value"]]
+            .to_numpy()
+            .tolist()
+        )  # ヒストグラム用のrgb値カウント数
+
+        bar_text = self.df.loc[:, ["plt_text"]].to_numpy().flatten()  # ヒストグラム用x軸ラベル
 
         # ヒストグラムを表示する。
         ax.barh(
             np.arange(self.number_of_cluster),
             rgb_value_counts,
             color=bar_color,
-            tick_label=bar_text_list,
+            tick_label=bar_text,
         )
 
     def output_replaced_image(self, ax):
@@ -205,16 +188,15 @@ def main():
 
         # 分析する範囲を指定して、分析範囲を四角で囲む
         analysis_image = SpecifyAnalysisRange(original_image)
-        square_range_image = analysis_image.clip()
         overall_image = analysis_image.overall_image
 
         # K平均法で計算する
-        k_means = KMeansAnalyzer(square_range_image)
+        k_means = KMeansAnalyzer(analysis_image.clipped)
         df = k_means.analyze()
 
         make_figure = MakeFigure(
             dataframe=df,
-            image=square_range_image,
+            image=analysis_image.clipped,
             rgb_value=k_means.rgb_value,
             labels=k_means.labels,
         )
@@ -226,7 +208,7 @@ def main():
         ax1.imshow(overall_image)
         fig.set_size_inches(18, 5)  # figを拡大する
         # 切り抜き画像を表示する。
-        ax2.imshow(square_range_image)
+        ax2.imshow(analysis_image.clipped)
 
         # ヒストグラムを表示する
         make_figure.output_histgram(ax3)
@@ -234,8 +216,8 @@ def main():
         # クラスタ数分の色値で置き換え画像を生成
         make_figure.output_replaced_image(ax4)
 
+        # 各タイトル
         ax2_title = "x:{} y:{}".format(str(START_X), str(START_Y))
-
         ax1.set_title("overall view " + IMG_NAME)
         ax2.set_title("cliped Image_" + ax2_title)
         ax3.set_title("histgram")
