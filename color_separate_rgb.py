@@ -8,12 +8,12 @@ import pandas as pd
 
 # 画像のパス、名前、切り抜く範囲を指定する
 IMG_PATH = "data/sample/Google-Logo.jpg"
-# IMG_PATH = "data/sample/sea-free-photo5.jpg"
+IMG_PATH = "data/sample/sea-free-photo5.jpg"
 # IMG_PATH = "data/sample/fresh-fruits-2305192_960_720.jpg"
 IMG_NAME = IMG_PATH.split("/")[-1]
 START_X, START_Y = 0, 0
 RANGE_X, RANGE_Y = 1500, 1000
-NUMBER_OF_CLUSTERS = 5
+NUMBER_OF_CLUSTERS = 20
 
 
 # 読み込む画像を指定する
@@ -211,10 +211,12 @@ def main():
         ax2.set_title("cliped Image_" + ax2_title)
         ax3.set_title("histgram")
         ax4.set_title("replaced image")
+        # plt.savefig("./sample_image_result/{}_k{}_result.jpg".format(IMG_NAME, NUMBER_OF_CLUSTERS))
 
         # クラスタ数分のRGB値で置き換え画像のみを表示
         fig, ax = plt.subplots()
         ax.imshow(make_figure.dst)
+        # plt.savefig("./sample_image_result/{}_k{}_replaced.jpg".format(IMG_NAME, NUMBER_OF_CLUSTERS))
         plt.show()
 
     except KeyboardInterrupt:
