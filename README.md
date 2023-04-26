@@ -38,7 +38,7 @@ NUMBER_OF_CLUSTERS = 5
 - `IMG_NAME`で、画像ファイル名を指定する。
 - `START_X, START_Y`で、切り抜き位置を指定する。
 - `RANGE_X, RANGE_Y`で、どのくらいのピクセル分切り取るか指定する。
-- `NUMBER_OF_CLUSTERS`で、K-平均のクラスタ数を指定する。
+- `NUMBER_OF_CLUSTERS`で、K-平均のクラスタ数を指定する。例えば、5と指定すれば5つの色に分類します。数値が大きくなるほど計算量が多くなるため、時間がかかります。
 
 # K-平均法
 
