@@ -15,7 +15,7 @@ K-平均法はマーケティング調査や自然言語処理にも使われま
 ![fresh-fruits](data/sample/fresh-fruits-2305192_960_720.jpg)
 
 これを10個の色で分けたとき、以下のような絵画っぽい画像を作ることができます。
-![Google-Logo](sample_image_result/Google-Logo.jpg_k10_replaced.jpg)
+![Google-Logo](sample_image_result/fresh-fruits-2305192_960_720.jpg_k10_replaced.jpg)
 
 # ライブラリのインストール
 必要なライブラリは以下でインストールする。
