@@ -101,7 +101,7 @@ class KMeansAnalyzer:
             self.labels, axis=0, return_counts=True
         )  # 重複したラベルを抽出し、カウント（NUMBER_OF_CLUSTERSの大きさだけラベルタイプが存在する）
 
-        self.df = self.__summarize_result(self.rgb_value,  self.counts)
+        self.df = self.__summarize_result(self.rgb_value, self.counts)
 
         return self.df
 
@@ -129,13 +129,20 @@ class KMeansAnalyzer:
 
 
 class MakeFigure:
-    def __init__(self, dataframe, image, rgb_value, labels) -> None:
+    def __init__(self, dataframe, overall_image, cliped_image, rgb_value, labels):
         print(dataframe)
-        self.df = dataframe
+        self.df = dataframe  # DataFrame
         self.number_of_cluster = NUMBER_OF_CLUSTERS  # クラスタ数
-        self.image = image  # 読み込む画像
+        self.overall_image = overall_image  # 全体画像
+        self.cliped_image = cliped_image  # 切り抜き画像
         self.rgb_value = rgb_value  # RGB値
         self.labels = labels  # 図専用ラベル
+
+    def output_overall_image(self, ax):
+        ax.imshow(self.overall_image)
+
+    def output_cliped_image(self, ax):
+        ax.imshow(self.cliped_image)
 
     def output_histgram(self, ax):
         rgb_value_counts = (
@@ -160,7 +167,7 @@ class MakeFigure:
 
     def output_replaced_image(self, ax):
         # 各画素を k平均法の結果に置き換える。
-        self.dst = self.rgb_value[self.labels].reshape(self.image.shape)
+        self.dst = self.rgb_value[self.labels].reshape(self.cliped_image.shape)
         ax.imshow(self.dst)
 
 
@@ -180,7 +187,8 @@ def main():
 
         make_figure = MakeFigure(
             dataframe=df,
-            image=analysis_image.clipped,
+            cliped_image=analysis_image.clipped,
+            overall_image=overall_image,
             rgb_value=k_means.rgb_value,
             labels=k_means.labels,
         )
@@ -189,15 +197,13 @@ def main():
         fig, [ax1, ax2, ax3, ax4] = plt.subplots(1, 4, figsize=(16, 5))
         fig.subplots_adjust(wspace=0.5)
 
-        ax1.imshow(overall_image)
-        fig.set_size_inches(18, 5)  # figを拡大する
+        # 全体画像を表示する
+        make_figure.output_overall_image(ax1)
         # 切り抜き画像を表示する。
-        ax2.imshow(analysis_image.clipped)
-
+        make_figure.output_cliped_image(ax2)
         # ヒストグラムを表示する
         make_figure.output_histgram(ax3)
-
-        # クラスタ数分の色値で置き換え画像を生成
+        # クラスタ数分のRGB値で置き換え画像を生成
         make_figure.output_replaced_image(ax4)
 
         # 各タイトル
@@ -207,9 +213,7 @@ def main():
         ax3.set_title("histgram")
         ax4.set_title("replaced image")
 
-        plt.show()
-
-        # 置き換えた色で画像のみを表示
+        # クラスタ数分のRGB値で置き換え画像のみを表示
         fig, ax = plt.subplots()
         ax.imshow(make_figure.dst)
         plt.show()
