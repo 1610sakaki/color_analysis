@@ -1,5 +1,4 @@
 # ライブラリのインポート
-import colorsys  # HSV計算用ライブラリ
 import sys
 
 import cv2
