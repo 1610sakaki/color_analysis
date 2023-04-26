@@ -157,7 +157,7 @@ class MakeFigure:
 ![Google-Logo](sample_image_result/fresh-fruits-2305192_960_720.jpg_k50_result.jpg)
 ![Google-Logo](sample_image_result/fresh-fruits-2305192_960_720.jpg_k50_replaced.jpg)
 
-## 山と海
+## 風景の写真
 ### 元画像
 ![sea-free-photo](data/sample/sea-free-photo5.jpg)
 ### K=5
