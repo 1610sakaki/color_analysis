@@ -1,3 +1,12 @@
+# 概要
+画像処理においてもよく使用されるクラスタリングアルゴリズムの一つである**K-平均法**を使って、画像分析する方法をまとめてます。
+
+# ライブラリのインストール
+必要なライブラリは以下でインストールする。
+``` bash
+pip3 install -r requirements.txt
+```
+
 # 画像のパス、名前、切り抜く範囲を指定する
 設定しやすい用に、先頭に定数（厳密な意味では定数でないが）として設定している。
 ```Python
@@ -56,6 +65,59 @@ _, labels, rgb_value = cv2.kmeans(
 compactness:各点とその所属するクラスタ中心との距離の総和。
 labels:各データ点の所属するクラスタのラベル。
 centers:クラスタの中心点の座標の配列。要は画像の場合は、RGBのリストになっている。
+
+# 図の出力
+
+```Python
+class MakeFigure:
+    def __init__(self, dataframe, overall_image, cliped_image, rgb_value, labels):
+        print(dataframe)
+        self.df = dataframe  # DataFrame
+        self.number_of_cluster = NUMBER_OF_CLUSTERS  # クラスタ数
+        self.overall_image = overall_image  # 全体画像
+        self.cliped_image = cliped_image  # 切り抜き画像
+        self.rgb_value = rgb_value  # RGB値
+        self.labels = labels  # 図専用ラベル
+
+    def output_overall_image(self, ax):
+        ax.imshow(self.overall_image)
+
+    def output_cliped_image(self, ax):
+        ax.imshow(self.cliped_image)
+
+    def output_histgram(self, ax):
+        rgb_value_counts = (
+            self.df.loc[:, ["counts"]].to_numpy().flatten().tolist()
+        )  # ヒストグラム用のrgb値カウント数
+
+        bar_color = (
+            self.df.loc[:, ["plt_R_value", "plt_G_value", "plt_B_value"]]
+            .to_numpy()
+            .tolist()
+        )  # ヒストグラム用のrgb値カウント数
+
+        bar_text = self.df.loc[:, ["plt_text"]].to_numpy().flatten()  # ヒストグラム用x軸ラベル
+
+        # ヒストグラムを表示する。
+        ax.barh(
+            np.arange(self.number_of_cluster),
+            rgb_value_counts,
+            color=bar_color,
+            tick_label=bar_text,
+        )
+
+    def output_replaced_image(self, ax):
+        # 各画素を k平均法の結果に置き換える。
+        self.dst = self.rgb_value[self.labels].reshape(self.cliped_image.shape)
+        ax.imshow(self.dst)
+```
+
+このコードで結果の図の出力を行っています。
+- ax1：全体画像
+- ax2：切り取り指定した後の画像
+- ax3：K平均法の解析結果のヒストグラム
+- ax4：各画素を k平均法の結果に置き換えた画像
+
 
 # サンプル画像でK-平均をやってみる。
 
