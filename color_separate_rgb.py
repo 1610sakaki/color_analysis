@@ -6,6 +6,7 @@ import cv2
 import matplotlib.pyplot as plt
 import numpy as np
 import pandas as pd
+from PIL import Image
 
 NUM = 1
 
@@ -17,6 +18,7 @@ RANGE_Y = 1000
 
 # 画像ファイルパス
 IMG_PATH = "data/sample/Google-Logo.jpg"
+IMG_PATH = "data/sample/sea-free-photo5.jpg"
 IMG_NAME = IMG_PATH.split("/")[-1]
 
 # K平均法クラスタ数
@@ -45,6 +47,7 @@ class SetLoadingImage:
 class SpecifyAnalysisRange:
     def __init__(self, img) -> None:
         self.org_img = img
+        self.width, self.height = self.org_img.size
         self.drawed_img = np.copy(img)
 
     # 切り抜き範囲を描画する
@@ -53,7 +56,7 @@ class SpecifyAnalysisRange:
         start_x=START_X,
         start_y=START_Y,
         draw_range_x=RANGE_X,
-        draw_range_y=RANGE_Y
+        draw_range_y=RANGE_Y,
     ):
 
         self.clipped_img = self.drawed_img[
@@ -143,13 +146,13 @@ class KMeansAnalyzer:
 
         # plt用に補正
         bar_color = rgb_value / 255
-        df["plt_r_color"] = bar_color[:, 0]
-        df["plt_g_color"] = bar_color[:, 1]
-        df["plt_b_color"] = bar_color[:, 2]
+        df["plt_R_value"] = bar_color[:, 0]
+        df["plt_G_value"] = bar_color[:, 1]
+        df["plt_B_value"] = bar_color[:, 2]
 
         # グラフ描画用文字列
         bar_text = list(map(str, rgb_value))
-        df["text"] = bar_text
+        df["plt_text"] = bar_text
 
         # countsの個数順にソートして、indexを振り直す
         df = df.sort_values("counts", ascending=True).reset_index(drop=True)
@@ -170,12 +173,12 @@ class MakeFigure:
         print(dataframe)
         self.df = dataframe
         self.number_of_cluster = NUMBER_OF_CLUSTERS  # クラスタ数
-        self.image = image
-        self.rgb_value = rgb_value
-        self.labels = labels
+        self.image = image  # 読み込む画像
+        self.rgb_value = rgb_value  # RGB値
+        self.labels = labels  # 図専用ラベル
 
     def output_histgram(self, ax):
-        rgb_value_counts = self.df.iloc[:, 0].to_numpy().tolist()
+        rgb_value_counts = self.df.iloc[:, 0].to_numpy().tolist()  # ヒストグラム用のrgb値カウント数
         bar_color = self.df.iloc[:, 7:10].to_numpy().tolist()
         bar_text = self.df.iloc[:, 1:4].to_numpy().tolist()
         bar_text_list = list(map(str, bar_text))
@@ -190,8 +193,8 @@ class MakeFigure:
 
     def output_replaced_image(self, ax):
         # 各画素を k平均法の結果に置き換える。
-        dst = self.rgb_value[self.labels].reshape(self.image.shape)
-        ax.imshow(dst)
+        self.dst = self.rgb_value[self.labels].reshape(self.image.shape)
+        ax.imshow(self.dst)
 
 
 def main():
@@ -238,7 +241,12 @@ def main():
         ax3.set_title("histgram")
         ax4.set_title("replaced image")
 
-        # plt.show()
+        plt.show()
+
+        # 置き換えた色で画像のみを表示
+        fig, ax = plt.subplots()
+        ax.imshow(make_figure.dst)
+        plt.show()
 
     except KeyboardInterrupt:
         print("キーボード割り込み")
