@@ -27,7 +27,7 @@ pip3 install -r requirements.txt
 
 
 ## 画像のパス、名前、切り抜く範囲を指定する
-設定しやすい用に、先頭に定数（厳密な意味では定数でないが）として設定している。
+設定しやすい用に、先頭に定数（厳密な意味では定数でないが）として置いている。
 ```Python
 IMG_PATH = "data/sample/Google-Logo.jpg"
 # IMG_PATH = "data/sample/sea-free-photo5.jpg"
@@ -176,7 +176,7 @@ criteria = cv2.TERM_CRITERIA_MAX_ITER + cv2.TERM_CRITERIA_EPS, 10, 1.0
 cv2.TERM_CRITERIA_MAX_ITER：反復回数が最大値に達した場合に収束判定を行うフラグ
 cv2.TERM_CRITERIA_EPS：クラスタ中心が移動する距離がしきい値以下になった場合に収束判定を行うフラグ
 
-```
+``` Python
 criteria = cv2.TERM_CRITERIA_MAX_ITER + cv2.TERM_CRITERIA_EPS, 10, 1.0
 ```
 であれば、最大反復回数が10で、移動量の閾値が1.0
@@ -323,5 +323,5 @@ main関数内では以下のように書きます。
 ![Google-Logo](sample_image_result/sea-free-photo5.jpg_k50_replaced.jpg)
 
 # 参考
-https://xtrend.nikkei.com/atcl/contents/18/00076/00008/　<br> 
+https://xtrend.nikkei.com/atcl/contents/18/00076/00008/　<br>
 https://pystyle.info/opencv-kmeans/
