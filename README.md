@@ -323,5 +323,5 @@ main関数内では以下のように書きます。
 ![Google-Logo](sample_image_result/sea-free-photo5.jpg_k50_replaced.jpg)
 
 # 参考
-https://xtrend.nikkei.com/atcl/contents/18/00076/00008/
+https://xtrend.nikkei.com/atcl/contents/18/00076/00008/　<br> 
 https://pystyle.info/opencv-kmeans/
